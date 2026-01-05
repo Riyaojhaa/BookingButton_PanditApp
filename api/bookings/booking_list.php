@@ -1,4 +1,14 @@
 <?php
+// ✅ CORS headers
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 require_once __DIR__ . '/../../db_connection.php';
 header('Content-Type: application/json');
 
@@ -27,13 +37,16 @@ if (!$user_id) {
 }
 
 try {
-    // ✅ Fetch data from MongoDB
-    $cursor = $bookingsCollection->find(['user_id' => (string)$user_id]);
+    // ✅ Fetch data from MongoDB (sorted by created_at desc)
+    $cursor = $bookingsCollection->find(
+        ['user_id' => (string)$user_id],
+        ['sort' => ['created_at' => -1]] // ✅ Latest first
+    );
     $bookings = iterator_to_array($cursor);
 
     // ✅ If no bookings found
     if (empty($bookings)) {
-        http_response_code(200); // 200 is better than 204 (204 = no response body)
+        http_response_code(200);
         echo json_encode([
             'success' => true,
             'code' => 200,
@@ -45,9 +58,14 @@ try {
 
     // ✅ Format the bookings before sending
     foreach ($bookings as &$b) {
-        $b['_id'] = (string)$b['_id'];
+        $b['booking_id'] = (string)$b['_id']; // ✅ Better naming
+        unset($b['_id']); // Remove MongoDB _id
+        
         if (isset($b['created_at'])) {
             $b['created_at'] = $b['created_at']->toDateTime()->format('Y-m-d H:i:s');
+        }
+        if (isset($b['updated_at'])) {
+            $b['updated_at'] = $b['updated_at']->toDateTime()->format('Y-m-d H:i:s');
         }
     }
 
@@ -57,7 +75,7 @@ try {
         'success' => true,
         'code' => 200,
         'message' => 'Bookings fetched successfully',
-        'data' => $bookings
+        'data' => array_values($bookings) // ✅ Clean array indices
     ]);
 
 } catch (Exception $e) {

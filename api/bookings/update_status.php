@@ -1,4 +1,15 @@
 <?php
+// ✅ CORS headers add karo (same as booking_create)
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: PUT, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 require_once __DIR__ . '/../../db_connection.php';
 header('Content-Type: application/json');
 
@@ -48,7 +59,7 @@ try {
         ['_id' => new MongoDB\BSON\ObjectId($booking_id)],
         [
             '$set' => [
-                'status' => $status,
+                'booking_status' => $status,
                 'updated_at' => new MongoDB\BSON\UTCDateTime()
             ]
         ]
@@ -65,12 +76,16 @@ try {
         exit;
     }
 
-    // ✅ Success response
+    // ✅ Success response with updated data
     http_response_code(200);
     echo json_encode([
         'success' => true,
         'code' => 200,
-        'message' => "Booking status updated to {$status}"
+        'message' => "Booking status updated to {$status}",
+        'data' => [
+            'booking_id' => $booking_id,
+            'new_status' => $status
+        ]
     ]);
 
 } catch (Exception $e) {
@@ -82,3 +97,4 @@ try {
         'error' => $e->getMessage()
     ]);
 }
+?>
