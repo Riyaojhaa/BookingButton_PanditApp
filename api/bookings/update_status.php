@@ -61,6 +61,9 @@ try {
             '$set' => [
                 'booking_status' => $status,
                 'updated_at' => new MongoDB\BSON\UTCDateTime()
+            ],
+            '$unset' => [
+                'status' => ""  // ✅ Remove old 'status' field if exists
             ]
         ]
     );
