@@ -23,25 +23,48 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// ✅ Get user_id from query params
-$user_id = $_GET['user_id'] ?? null;
+// ✅ Get user_id or pandit_id from query params
+$user_id   = $_GET['user_id'] ?? null;
+$pandit_id = $_GET['pandit_id'] ?? null;
 
-if (!$user_id) {
+// ❌ If neither is provided
+if (!$user_id && !$pandit_id) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
         'code' => 400,
-        'message' => 'user_id is required'
+        'message' => 'user_id or pandit_id is required'
+    ]);
+    exit;
+}
+
+// ❌ If both are provided
+if ($user_id && $pandit_id) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'code' => 400,
+        'message' => 'Send only one: user_id OR pandit_id'
     ]);
     exit;
 }
 
 try {
-    // ✅ Fetch data from MongoDB (sorted by created_at desc)
+    // ✅ Build MongoDB filter dynamically
+    $filter = [];
+
+    if ($user_id) {
+        $filter['user_id'] = (string)$user_id;
+    } else {
+        $filter['pandit_id'] = (string)$pandit_id;
+    }
+
+    // ✅ Fetch bookings (latest first)
     $cursor = $bookingsCollection->find(
-        ['user_id' => (string)$user_id],
-        ['sort' => ['created_at' => -1]] // ✅ Latest first
+        $filter,
+        ['sort' => ['created_at' => -1]]
     );
+
     $bookings = iterator_to_array($cursor);
 
     // ✅ If no bookings found
@@ -50,20 +73,21 @@ try {
         echo json_encode([
             'success' => true,
             'code' => 200,
-            'message' => 'No bookings found for this user',
+            'message' => 'No bookings found',
             'data' => []
         ]);
         exit;
     }
 
-    // ✅ Format the bookings before sending
+    // ✅ Format response
     foreach ($bookings as &$b) {
-        $b['booking_id'] = (string)$b['_id']; // ✅ Better naming
-        unset($b['_id']); // Remove MongoDB _id
-        
+        $b['booking_id'] = (string)$b['_id'];
+        unset($b['_id']);
+
         if (isset($b['created_at'])) {
             $b['created_at'] = $b['created_at']->toDateTime()->format('Y-m-d H:i:s');
         }
+
         if (isset($b['updated_at'])) {
             $b['updated_at'] = $b['updated_at']->toDateTime()->format('Y-m-d H:i:s');
         }
@@ -75,11 +99,11 @@ try {
         'success' => true,
         'code' => 200,
         'message' => 'Bookings fetched successfully',
-        'data' => array_values($bookings) // ✅ Clean array indices
+        'data' => array_values($bookings)
     ]);
 
 } catch (Exception $e) {
-    // ✅ Error response
+    // ❌ Error response
     http_response_code(500);
     echo json_encode([
         'success' => false,
