@@ -16,9 +16,15 @@ header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     echo json_encode([
-        'success' => false,
-        'code' => 405,
-        'message' => 'Only GET method allowed'
+        "apiResponseCode" => 405,
+        "apiResponseData" => [
+            "responseCode" => 405,
+            "responseData" => null,
+            "responseMessage" => "Only GET method allowed",
+            "responseFrom" => "booking_list"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Only GET method allowed"
     ]);
     exit;
 }
@@ -31,9 +37,15 @@ $pandit_id = $_GET['pandit_id'] ?? null;
 if (!$user_id && !$pandit_id) {
     http_response_code(400);
     echo json_encode([
-        'success' => false,
-        'code' => 400,
-        'message' => 'user_id or pandit_id is required'
+        "apiResponseCode" => 400,
+        "apiResponseData" => [
+            "responseCode" => 400,
+            "responseData" => null,
+            "responseMessage" => "user_id or pandit_id is required",
+            "responseFrom" => "booking_list"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "user_id or pandit_id is required"
     ]);
     exit;
 }
@@ -42,9 +54,15 @@ if (!$user_id && !$pandit_id) {
 if ($user_id && $pandit_id) {
     http_response_code(400);
     echo json_encode([
-        'success' => false,
-        'code' => 400,
-        'message' => 'Send only one: user_id OR pandit_id'
+        "apiResponseCode" => 400,
+        "apiResponseData" => [
+            "responseCode" => 400,
+            "responseData" => null,
+            "responseMessage" => "Send only one: user_id OR pandit_id",
+            "responseFrom" => "booking_list"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Send only one: user_id OR pandit_id"
     ]);
     exit;
 }
@@ -71,10 +89,15 @@ try {
     if (empty($bookings)) {
         http_response_code(200);
         echo json_encode([
-            'success' => true,
-            'code' => 200,
-            'message' => 'No bookings found',
-            'data' => []
+            "apiResponseCode" => 200,
+            "apiResponseData" => [
+                "responseCode" => 200,
+                "responseData" => [],
+                "responseMessage" => "No bookings found",
+                "responseFrom" => "booking_list"
+            ],
+            "apiResponseFrom" => "php",
+            "apiResponseMessage" => "No bookings found"
         ]);
         exit;
     }
@@ -96,20 +119,30 @@ try {
     // ✅ Success response
     http_response_code(200);
     echo json_encode([
-        'success' => true,
-        'code' => 200,
-        'message' => 'Bookings fetched successfully',
-        'data' => array_values($bookings)
+        "apiResponseCode" => 200,
+        "apiResponseData" => [
+            "responseCode" => 200,
+            "responseData" => array_values($bookings),
+            "responseMessage" => "Bookings fetched successfully",
+            "responseFrom" => "booking_list"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Bookings fetched successfully"
     ]);
 
 } catch (Exception $e) {
     // ❌ Error response
     http_response_code(500);
     echo json_encode([
-        'success' => false,
-        'code' => 500,
-        'message' => 'Failed to fetch bookings',
-        'error' => $e->getMessage()
+        "apiResponseCode" => 500,
+        "apiResponseData" => [
+            "responseCode" => 500,
+            "responseData" => null,
+            "responseMessage" => "Failed to fetch bookings",
+            "responseFrom" => "booking_list"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Failed to fetch bookings"
     ]);
 }
 ?>

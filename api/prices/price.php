@@ -9,9 +9,15 @@ header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     echo json_encode([
-        'success' => false,
-        'code' => 405,
-        'message' => 'Only GET method allowed'
+        "apiResponseCode" => 405,
+        "apiResponseData" => [
+            "responseCode" => 405,
+            "responseData" => null,
+            "responseMessage" => "Only GET method allowed",
+            "responseFrom" => "price"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Only GET method allowed"
     ]);
     exit;
 }
@@ -32,9 +38,15 @@ $travelPref = $_GET['travel_preference'] ?? null;
 if (!$poojaType || !$travelPref) {
     http_response_code(400);
     echo json_encode([
-        'success' => false,
-        'code' => 400,
-        'message' => 'pooja_type and travel_preference are required'
+        "apiResponseCode" => 400,
+        "apiResponseData" => [
+            "responseCode" => 400,
+            "responseData" => null,
+            "responseMessage" => "pooja_type and travel_preference are required",
+            "responseFrom" => "price"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "pooja_type and travel_preference are required"
     ]);
     exit;
 }
@@ -71,9 +83,15 @@ $travelMultipliers = [
 if (!array_key_exists($poojaType, $basePrices)) {
     http_response_code(400);
     echo json_encode([
-        'success' => false,
-        'code' => 400,
-        'message' => 'Invalid pooja type'
+        "apiResponseCode" => 400,
+        "apiResponseData" => [
+            "responseCode" => 400,
+            "responseData" => null,
+            "responseMessage" => "Invalid pooja type",
+            "responseFrom" => "price"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Invalid pooja type"
     ]);
     exit;
 }
@@ -86,9 +104,15 @@ if (!array_key_exists($poojaType, $basePrices)) {
 if (!array_key_exists($travelPref, $travelMultipliers)) {
     http_response_code(400);
     echo json_encode([
-        'success' => false,
-        'code' => 400,
-        'message' => 'Invalid travel preference'
+        "apiResponseCode" => 400,
+        "apiResponseData" => [
+            "responseCode" => 400,
+            "responseData" => null,
+            "responseMessage" => "Invalid travel preference",
+            "responseFrom" => "price"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Invalid travel preference"
     ]);
     exit;
 }
@@ -105,26 +129,27 @@ $juniorPrice = (int) ($basePrice * $multiplier);
 $midPrice    = (int) ($basePrice * $multiplier * 1.3);
 $seniorPrice = (int) ($basePrice * $multiplier * 1.6);
 
-/*
-|--------------------------------------------------------------------------
-| Success response
-|--------------------------------------------------------------------------
-*/
+
 http_response_code(200);
 echo json_encode([
-    'success' => true,
-    'code' => 200,
-    'message' => 'Pandit price calculated successfully',
-    'data' => [
-        'pooja_type' => $poojaType,
-        'travel_preference' => $travelPref,
-        'travel_multiplier' => $multiplier,
-        'base_price' => $basePrice,
-        'prices' => [
-            'junior' => $juniorPrice,
-            'mid'    => $midPrice,
-            'senior' => $seniorPrice
-        ]
-    ]
+    "apiResponseCode" => 200,
+    "apiResponseData" => [
+        "responseCode" => 200,
+        "responseData" => [
+            'pooja_type' => $poojaType,
+            'travel_preference' => $travelPref,
+            'travel_multiplier' => $multiplier,
+            'base_price' => $basePrice,
+            'prices' => [
+                'junior' => $juniorPrice,
+                'mid'    => $midPrice,
+                'senior' => $seniorPrice
+            ]
+        ],
+        "responseMessage" => "Pandit price calculated successfully",
+        "responseFrom" => "price"
+    ],
+    "apiResponseFrom" => "php",
+    "apiResponseMessage" => "Pandit price calculated successfully"
 ]);
 exit;

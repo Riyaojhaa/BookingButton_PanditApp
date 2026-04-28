@@ -13,42 +13,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/../../db_connection.php';
 header('Content-Type: application/json');
 
-// ✅ Only PUT method allowed
+
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
     echo json_encode([
-        'success' => false,
-        'code' => 405,
-        'message' => 'Only PUT method allowed'
+        "apiResponseCode" => 405,
+        "apiResponseData" => [
+            "responseCode" => 405,
+            "responseData" => null,
+            "responseMessage" => "Only PUT method allowed",
+            "responseFrom" => "update_status"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Only PUT method allowed"
     ]);
     exit;
 }
 
-// ✅ Read JSON input
+
 $input = json_decode(file_get_contents("php://input"), true);
 
 $booking_id = $input['booking_id'] ?? null;
 $status     = $input['status'] ?? null;
 
-// ✅ Validation
+
 if (!$booking_id || !$status) {
     http_response_code(400);
     echo json_encode([
-        'success' => false,
-        'code' => 400,
-        'message' => 'booking_id and status are required'
+        "apiResponseCode" => 400,
+        "apiResponseData" => [
+            "responseCode" => 400,
+            "responseData" => null,
+            "responseMessage" => "booking_id and status are required",
+            "responseFrom" => "update_status"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "booking_id and status are required"
     ]);
     exit;
 }
 
-// ✅ Allow only accepted or rejected
+
 $allowedStatus = ['accepted', 'rejected'];
 if (!in_array($status, $allowedStatus)) {
     http_response_code(400);
     echo json_encode([
-        'success' => false,
-        'code' => 400,
-        'message' => 'Status must be accepted or rejected'
+        "apiResponseCode" => 400,
+        "apiResponseData" => [
+            "responseCode" => 400,
+            "responseData" => null,
+            "responseMessage" => "Status must be accepted or rejected",
+            "responseFrom" => "update_status"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Status must be accepted or rejected"
     ]);
     exit;
 }
@@ -63,18 +81,24 @@ try {
                 'updated_at' => new MongoDB\BSON\UTCDateTime()
             ],
             '$unset' => [
-                'status' => ""  // ✅ Remove old 'status' field if exists
+                'status' => ""  
             ]
         ]
     );
 
-    // ✅ If no document updated
+
     if ($result->getMatchedCount() === 0) {
         http_response_code(404);
         echo json_encode([
-            'success' => false,
-            'code' => 404,
-            'message' => 'Booking not found'
+            "apiResponseCode" => 404,
+            "apiResponseData" => [
+                "responseCode" => 404,
+                "responseData" => null,
+                "responseMessage" => "Booking not found",
+                "responseFrom" => "update_status"
+            ],
+            "apiResponseFrom" => "php",
+            "apiResponseMessage" => "Booking not found"
         ]);
         exit;
     }
@@ -82,22 +106,32 @@ try {
     // ✅ Success response with updated data
     http_response_code(200);
     echo json_encode([
-        'success' => true,
-        'code' => 200,
-        'message' => "Booking status updated to {$status}",
-        'data' => [
-            'booking_id' => $booking_id,
-            'new_status' => $status
-        ]
+        "apiResponseCode" => 200,
+        "apiResponseData" => [
+            "responseCode" => 200,
+            "responseData" => [
+                'booking_id' => $booking_id,
+                'new_status' => $status
+            ],
+            "responseMessage" => "Booking status updated to {$status}",
+            "responseFrom" => "update_status"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Booking status updated to {$status}"
     ]);
 
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'success' => false,
-        'code' => 500,
-        'message' => 'Failed to update booking status',
-        'error' => $e->getMessage()
+        "apiResponseCode" => 500,
+        "apiResponseData" => [
+            "responseCode" => 500,
+            "responseData" => null,
+            "responseMessage" => "Failed to update booking status",
+            "responseFrom" => "update_status"
+        ],
+        "apiResponseFrom" => "php",
+        "apiResponseMessage" => "Failed to update booking status"
     ]);
 }
 ?>
